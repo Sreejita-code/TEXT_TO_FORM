@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Marketing Form Builder</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+
+        .loader {
+
+            border: 3px solid #f3f3f3;
+
+            border-top: 3px solid #3498db;
+
+            border-radius: 50%;
+
+            width: 20px;
+
+            height: 20px;
+
+            animation: spin 1s linear infinite;
+
+            display: inline-block;
+
+            vertical-align: middle;
+
+            margin-right: 8px;
+
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+
+</head>
+
+<body class="bg-slate-50 min-h-screen pb-20">
+
+
+
+    <div class="max-w-4xl mx-auto pt-12 px-4">
+
+        <header class="mb-10 text-center">
+
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-2">Instant Form Gen</h1>
+
+            <p class="text-slate-600">Type what you need, and we'll build the functional UI with meta-tags.</p>
+
+        </header>
+
+       
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+
+            <div class="flex flex-col md:flex-row gap-3">
+
+                <input id="promptInput" type="text"
+
+                    placeholder="e.g. Fintech conference form with mobile and business pain points"
+
+                    class="flex-1 border border-slate-300 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg">
+
+                <button onclick="generateForm()" id="genBtn"
+
+                    class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-200">
+
+                    Generate Form
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <div id="statusMessage" class="hidden mb-4 text-center text-sm font-medium"></div>
+
+
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <div id="formContainer" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-200 h-fit">
+
+                </div>
+
+
+
+            <div id="mappingPreview" class="hidden bg-slate-900 p-6 rounded-2xl shadow-xl text-white overflow-hidden h-fit">
+
+                <h3 class="text-blue-400 font-mono text-sm mb-4 uppercase tracking-widest">Live Metadata Mapping</h3>
+
+                <pre id="jsonOutput" class="text-xs font-mono text-emerald-400 whitespace-pre-wrap">Submit the form to sync with MongoDB...</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        // Adjust these URLs if your backend is hosted elsewhere
+
+        const API_BASE = 'http://localhost:5000/api';
+
+        let currentFormTitle = "";
+
+
+
+        async function generateForm() {
+
+            const prompt = document.getElementById('promptInput').value;
+
+            const btn = document.getElementById('genBtn');
+
+            const status = document.getElementById('statusMessage');
+
+           
+
+            if (!prompt) return alert("Please describe a form first.");
+
+
+
+            btn.disabled = true;
+
+            btn.innerHTML = '<span class="loader"></span> Thinking...';
+
+            status.classList.remove('hidden', 'text-red-500');
+
+            status.classList.add('text-blue-600');
+
+            status.innerText = "Consulting AI architect...";
+
+
+
+            try {
+
+                const response = await fetch(`${API_BASE}/generate-form`, {
+
+                    method: 'POST',
+
+                    headers: { 'Content-Type': 'application/json' },
+
+                    body: JSON.stringify({ prompt })
+
+                });
+
+
+
+                const data = await response.json();
+
+
+
+                if (data.success && data.schema) {
+
+                    currentFormTitle = data.schema.formTitle;
+
+                    renderUI(data.schema);
+
+                    status.innerText = "Form generated successfully!";
+
+                    status.classList.replace('text-blue-600', 'text-green-600');
+
+                } else {
+
+                    throw new Error(data.error || "Invalid response format");
+
+                }
+
+            } catch (err) {
+
+                console.error("Frontend Error:", err);
+
+                status.innerText = "Error: " + err.message;
+
+                status.classList.add('text-red-500');
+
+            } finally {
+
+                btn.disabled = false;
+
+                btn.innerText = "Generate Form";
+
+            }
+
+        }
+
+
+
+        function renderUI(schema) {
+
+            const container = document.getElementById('formContainer');
+
+            const preview = document.getElementById('mappingPreview');
+
+            const jsonOutput = document.getElementById('jsonOutput');
+
+           
+
+            container.classList.remove('hidden');
+
+            preview.classList.remove('hidden');
+
+
+
+            let html = `
+
+                <div class="mb-6">
+
+                    <h2 class="text-2xl font-bold text-slate-800">${schema.formTitle || 'New Form'}</h2>
+
+                    <p class="text-slate-500 text-sm">${schema.formDescription || ''}</p>
+
+                </div>
+
+                <form id="dynamicForm" class="space-y-5">
+
+            `;
+
+
+
+            if (schema.fields && Array.isArray(schema.fields)) {
+
+                schema.fields.forEach(field => {
+
+                    const inputClass = "w-full mt-1.5 border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all";
+
+                   
+
+                    html += `<div class="group">
+
+                        <label class="block text-sm font-semibold text-slate-700">${field.label}</label>`;
+
+                   
+
+                    if (field.type === 'textarea') {
+
+                        html += `<textarea name="${field.id}" data-tag="${field.metaTag}" placeholder="${field.placeholder}" class="${inputClass}" rows="3"></textarea>`;
+
+                    } else {
+
+                        html += `<input type="${field.type}" name="${field.id}" data-tag="${field.metaTag}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} class="${inputClass}">`;
+
+                    }
+
+                   
+
+                    html += `<span class="text-[10px] font-mono text-slate-400 mt-1 block group-hover:text-blue-500 transition-colors">TAG: ${field.metaTag}</span>
+
+                    </div>`;
+
+                });
+
+            }
+
+
+
+            html += `
+
+                <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold mt-6 hover:bg-black transition-all shadow-lg">
+
+                    Submit Data
+
+                </button>
+
+            </form>`;
+
+
+
+            container.innerHTML = html;
+
+
+
+            // Handle Submission Logic with MongoDB Integration
+
+            const form = document.getElementById('dynamicForm');
+
+            form.onsubmit = async (e) => {
+
+                e.preventDefault();
+
+                const submitBtn = document.getElementById('submitBtn');
+
+                submitBtn.disabled = true;
+
+                submitBtn.innerText = "Saving to Database...";
+
+
+
+                const mappedData = {};
+
+                const inputs = form.querySelectorAll('input, textarea');
+
+               
+
+                inputs.forEach(input => {
+
+                    mappedData[input.name] = {
+
+                        value: input.value,
+
+                        meta_tag: input.getAttribute('data-tag'),
+
+                        timestamp: new Date().toISOString()
+
+                    };
+
+                });
+
+
+
+                try {
+
+                    const response = await fetch(`${API_BASE}/submit`, {
+
+                        method: 'POST',
+
+                        headers: { 'Content-Type': 'application/json' },
+
+                        body: JSON.stringify({
+
+                            formTitle: currentFormTitle,
+
+                            mappedData: mappedData
+
+                        })
+
+                    });
+
+
+
+                    const result = await response.json();
+
+
+
+                    if (result.success) {
+
+                        jsonOutput.innerText = JSON.stringify(mappedData, null, 2);
+
+                        alert("Data successfully mapped and saved to MongoDB Atlas!");
+
+                    } else {
+
+                        throw new Error(result.error);
+
+                    }
+
+                } catch (err) {
+
+                    alert("Database Error: " + err.message);
+
+                } finally {
+
+                    submitBtn.disabled = false;
+
+                    submitBtn.innerText = "Submit Data";
+
+                }
+
+            };
+
+        }
+
+    </script>
+
+</body>
+
+</html>
