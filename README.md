@@ -1,19 +1,19 @@
 🚀 AI Form Architect: Generative UI & Metadata Mapper
-A powerful tool designed for marketing managers to bridge the gap between "intent" and "infrastructure." By typing a simple prompt, the system generates a fully functional, styled form and automatically maps user submissions to standardized meta-tags for clean data analytics.
+A powerful tool designed for marketing managers and developers to bridge the gap between "intent" and "infrastructure." By typing a simple prompt, the system generates a fully functional, styled form and automatically maps user submissions to standardized meta-tags for clean, structured data analytics.
 
 ✨ Key Features
-Natural Language to UI: Uses Google Gemini (2.5 Flash) to interpret prompts and generate a structured JSON schema.
+Natural Language to UI: Leverages Google Gemini (2.5 Flash) to interpret intent and generate structured JSON schemas for form generation.
 
-Dynamic Rendering: A lightweight frontend engine that builds HTML inputs, textareas, and labels on the fly.
+Dynamic Rendering Engine: A lightweight frontend architecture that builds HTML inputs, textareas, and labels on the fly based on AI-generated schemas.
 
-Automatic Metadata Mapping: Every field is assigned a metaTag (e.g., identity, credential, insight) by the AI, ensuring data is organized regardless of how the field is labeled.
+Automatic Metadata Mapping: Every field is intelligently assigned a metaTag (e.g., identity, credential, insight), ensuring data is organized regardless of how the field is labeled.
 
-Persistence: Fully integrated with MongoDB Atlas for storing submissions.
+Data Persistence: Fully integrated with MongoDB Atlas for secure storage and easy retrieval of form submissions.
 
-Modern UI: Styled with Tailwind CSS for a sleek, responsive experience.
+Modern UI/UX: Built with a "Mobile-First" approach using Tailwind CSS for a sleek, responsive experience.
 
 🛠️ Tech Stack
-Frontend: HTML5, JavaScript (ES6+), Tailwind CSS (via CDN).
+Frontend: HTML5, JavaScript (Vanilla ES6+), Tailwind CSS (via CDN).
 
 Backend: Node.js, Express.js.
 
@@ -24,47 +24,48 @@ AI Engine: Google Generative AI (Gemini SDK).
 📂 Project Structure
 Plaintext
 
-form-gen-project/
-├── server.js            # Node.js backend & AI orchestration
-├── index.html           # Dynamic frontend & generator interface
+TEXT_TO_FORM/
+├── public/              # Static assets and frontend
+│   ├── index.html       # UI for the generator & dynamic forms
+│   └── script.js        # Logic for frontend rendering
+├── models/              # Database Schemas
+│   └── FormSubmission.js # Mongoose schema for mapped data
 ├── .env                 # API keys and Database URI (gitignored)
+├── server.js            # Node.js backend & AI orchestration
 ├── package.json         # Project dependencies
 └── README.md            # Documentation
 🚀 Getting Started
 1. Prerequisites
 Node.js (v18 or higher)
 
-A Google AI Studio API Key (Get it here)
+Google AI Studio API Key
 
-A MongoDB Atlas Account (Create one here)
+MongoDB Atlas Account
 
 2. Installation
-Clone the repository and install the dependencies:
-
 Bash
 
-git clone https://github.com/your-username/ai-form-architect.git
-cd ai-form-architect
+git clone https://github.com/Sreejita-code/TEXT_TO_FORM.git
+cd TEXT_TO_FORM
 npm install
 3. Environment Setup
-Create a .env file in the root directory:
+Create a .env file in the root directory and add your credentials:
 
 Plaintext
 
 PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/formBuilder?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/formBuilder
 GEMINI_API_KEY=your_gemini_api_key_here
 4. Run the Application
-Start the backend server:
-
 Bash
 
+# Start the server
 node server.js
-Open index.html in your browser (use Live Server in VS Code or simply double-click the file).
+Open your browser and navigate to http://localhost:5000.
 
 📖 How It Works
 The Schema Generation
-When a user enters: "I need a doctors' conference registration with License Number," the AI returns:
+When a user enters: "I need a doctors' conference registration with License Number," the AI processes the request and returns a JSON schema:
 
 JSON
 
@@ -74,17 +75,5 @@ JSON
     { "id": "lic_no", "label": "Medical License Number", "type": "text", "metaTag": "credential" }
   ]
 }
-Data Mapping
-Upon submission, the data is stored in MongoDB as a mapped object. This allows marketing teams to query by metaTag rather than specific field names, making it easy to aggregate data across different forms.
-
-JSON
-
-{
-  "formTitle": "Doctors' Conference",
-  "mappedData": {
-    "lic_no": {
-      "value": "MD-99201",
-      "tag": "credential"
-    }
-  }
-}
+Data Mapping & Analytics
+Upon submission, data is stored in MongoDB as a mapped object. This allows teams to query by metaTag rather than specific field names, making it easy to aggregate data across hundreds of different forms.
