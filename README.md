@@ -2,7 +2,7 @@
 A powerful tool designed for marketing managers to bridge the gap between "intent" and "infrastructure." By typing a simple prompt, the system generates a fully functional, styled form and automatically maps user submissions to standardized meta-tags for clean data analytics.
 
 ✨ Key Features
-Natural Language to UI: Uses Google Gemini (1.5 Flash) to interpret prompts and generate a structured JSON schema.
+Natural Language to UI: Uses Google Gemini (2.5 Flash) to interpret prompts and generate a structured JSON schema.
 
 Dynamic Rendering: A lightweight frontend engine that builds HTML inputs, textareas, and labels on the fly.
 
